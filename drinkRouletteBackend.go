@@ -40,9 +40,6 @@ type Drink struct {
 }
 
 func main() {
-	/*http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, "Hello, %q", html.EscapeString(r.URL.Path))
-	})*/
 
 	http.HandleFunc("/ingredients", func(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(getIngredients())
