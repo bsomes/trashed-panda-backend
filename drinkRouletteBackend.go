@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"os"
 )
 
 type Category int
@@ -40,6 +41,7 @@ type Drink struct {
 }
 
 func main() {
+	port := os.Getenv("PORT")
 
 	http.HandleFunc("/ingredients", func(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(getIngredients())
@@ -49,7 +51,7 @@ func main() {
 		json.NewEncoder(w).Encode(getTestDrink())
 	})
 
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	log.Fatal(http.ListenAndServe(":"+port, nil))
 }
 
 func getIngredients() []Ingredient {
