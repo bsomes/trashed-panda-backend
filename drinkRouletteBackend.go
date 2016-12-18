@@ -25,6 +25,7 @@ const (
 )
 
 type Ingredient struct {
+	ID int `json:"ID"`
 	Name string   `json:"Name"`
 	Cat  Category `json:"Category"`
 }
@@ -57,18 +58,22 @@ func main() {
 func getIngredients() []Ingredient {
 	return []Ingredient{
 		Ingredient{
+			ID: 1
 			Name: "Vodka",
 			Cat:  Alcohol,
 		},
 		Ingredient{
+			ID: 2
 			Name: "Milk",
 			Cat:  Mixer,
 		},
 		Ingredient{
+			ID: 3
 			Name: "Kahlua",
 			Cat:  Alcohol,
 		},
 		Ingredient{
+			ID: 4
 			Name: "Cocoa powder",
 			Cat:  Other,
 		},
