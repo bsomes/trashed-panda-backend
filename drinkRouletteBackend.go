@@ -5,6 +5,8 @@ import (
 	"log"
 	"net/http"
 	"os"
+
+	"github.com/julienschmidt/httprouter"
 )
 
 type Category int
@@ -41,18 +43,22 @@ type Drink struct {
 	Size     Scale        `json:"Size"`
 }
 
+func getEncodedIngredients(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+	json.NewEncoder(w).Encode(getIngredients())
+}
+
+func test(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+	json.NewEncoder(w).Encode(getTestDrink())
+}
+
 func main() {
 	port := os.Getenv("PORT")
 
-	http.HandleFunc("/ingredients", func(w http.ResponseWriter, r *http.Request) {
-		json.NewEncoder(w).Encode(getIngredients())
-	})
+	router := httprouter.New()
+	router.GET("/ingredients", getEncodedIngredients)
+	router.GET("/test", test)
 
-	http.HandleFunc("/test", func(w http.ResponseWriter, r *http.Request) {
-		json.NewEncoder(w).Encode(getTestDrink())
-	})
-
-	log.Fatal(http.ListenAndServe(":"+port, nil))
+	log.Fatal(http.ListenAndServe(":"+port, router))
 }
 
 func getIngredients() []Ingredient {
