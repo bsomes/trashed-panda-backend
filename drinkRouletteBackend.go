@@ -49,10 +49,6 @@ func getEncodedIngredients(w http.ResponseWriter, r *http.Request, _ httprouter.
 	json.NewEncoder(w).Encode(getIngredients())
 }
 
-func test(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-	json.NewEncoder(w).Encode(getTestDrink())
-}
-
 func makeDrinkFromList(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	idString := ps.ByName("ingredients")
 	ids := strings.Split(idString, "-")
@@ -75,7 +71,6 @@ func main() {
 
 	router := httprouter.New()
 	router.GET("/ingredients", getEncodedIngredients)
-	router.GET("/test", test)
 	router.GET("/makedrink/:ingredients", makeDrinkFromList)
 
 	log.Fatal(http.ListenAndServe(":"+port, router))
@@ -112,12 +107,4 @@ func uniform(ingredients []Ingredient) []Proportion {
 		proportions[i] = Proportion{Ing: ingredients[i], Frac: 1 / float32(len(ingredients))}
 	}
 	return proportions
-}
-
-func getTestDrink() Drink {
-	return Drink{
-		Name:     "Mulatto",
-		Contents: uniform(getIngredients()),
-		Size:     Buttchug,
-	}
 }
