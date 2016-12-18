@@ -46,19 +46,15 @@ type Drink struct {
 }
 
 func getEncodedIngredients(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-	json.NewEncoder(w).Encode(getIngredients())
+	json.NewEncoder(w).Encode(getAllIngredients())
 }
 
 func makeDrinkFromList(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	idString := ps.ByName("ingredients")
 	ids := strings.Split(idString, "-")
-	ingredients := make([]Ingredient, len(ids))
-	allIngredients := getIngredients()
-	for ind, v := range ids {
-		if i, err := strconv.Atoi(v); err == nil {
-			ingredients[ind] = allIngredients[i]
-		}
-	}
+
+	allIngredients := getAllIngredients()
+	ingredients := ingredientsForDrink(ids, allIngredients)
 	json.NewEncoder(w).Encode(Drink{
 		Name:     "Test",
 		Contents: uniform(ingredients),
@@ -76,7 +72,7 @@ func main() {
 	log.Fatal(http.ListenAndServe(":"+port, router))
 }
 
-func getIngredients() []Ingredient {
+func getAllIngredients() []Ingredient {
 	return []Ingredient{
 		Ingredient{
 			ID:   0,
@@ -99,6 +95,16 @@ func getIngredients() []Ingredient {
 			Cat:  Other,
 		},
 	}
+}
+
+func ingredientsForDrink(ids []string, available []Ingredient) []Ingredient {
+	ingredients := make([]Ingredient, len(ids))
+	for ind, v := range ids {
+		if i, err := strconv.Atoi(v); err == nil {
+			ingredients[ind] = available[i]
+		}
+	}
+	return ingredients
 }
 
 func uniform(ingredients []Ingredient) []Proportion {
