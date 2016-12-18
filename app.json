@@ -1,0 +1,16 @@
+{
+  "name": "trashed-panda-backend",
+  "mount_dir": "src/github.com/bsomes/trashed-panda-backend",
+  "scripts": {
+  },
+  "env": {
+  },
+  "formation": {
+  },
+  "addons": [
+
+  ],
+  "buildpacks": [
+
+  ]
+}

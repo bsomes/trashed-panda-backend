@@ -1,0 +1,13 @@
+{
+	"comment": "",
+	"ignore": "test",
+	"package": [
+		{
+			"checksumSHA1": "Y3U6on66N0BszKXYvb2Q+qpG6f4=",
+			"path": "github.com/julienschmidt/httprouter",
+			"revision": "5dd70ee059943e81987a817fa1a755b11dd119c1",
+			"revisionTime": "2016-12-03T08:33:52Z"
+		}
+	],
+	"rootPath": "github.com/bsomes/trashed-panda-backend"
+}
