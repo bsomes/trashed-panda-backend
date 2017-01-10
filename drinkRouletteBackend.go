@@ -45,7 +45,13 @@ type Drink struct {
 	Size     Scale        `json:"Size"`
 }
 
+// allows GET requests from all external URLs
+func setDefaultHeader(w http.ResponseWriter) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+}
+
 func getEncodedIngredients(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+	setDefaultHeader(w)
 	json.NewEncoder(w).Encode(getAllIngredients())
 }
 
@@ -55,6 +61,8 @@ func makeDrinkFromList(w http.ResponseWriter, r *http.Request, ps httprouter.Par
 
 	allIngredients := getAllIngredients()
 	ingredients := ingredientsForDrink(ids, allIngredients)
+
+	setDefaultHeader(w)
 	json.NewEncoder(w).Encode(Drink{
 		Name:     "Test",
 		Contents: uniform(ingredients),
