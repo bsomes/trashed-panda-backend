@@ -3,10 +3,18 @@ package main
 import "testing"
 
 func TestIngredientLookup(t *testing.T) {
-	allPossible := getAllIngredients()
-	ids := []string{"0", "1"}
+	allPossible := makeIDMap(getAllIngredients())
+	ids := []string{"53", "54"}
 	used := ingredientsForDrink(ids, allPossible)
-	if used[0].ID != 0 || used[1].ID != 1 {
-		t.Error("expected 0 and 1", "got", used[0].ID, used[1].ID)
+	if used[0].ID != 53 || used[1].ID != 54 {
+		t.Error("expected 53 and 54", "got", used[0].ID, used[1].ID)
+	}
+}
+
+func TestIngredientLoad(t *testing.T) {
+	ingredients := getAllIngredients()
+	expectedName := "Gold Rum"
+	if ingredients[0].Name != expectedName {
+		t.Error("Expected the first ingredient to be", "instead it was", expectedName, ingredients[0].Name)
 	}
 }

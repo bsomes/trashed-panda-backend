@@ -1,7 +1,10 @@
+//The main package contains all logic for handling http requests to trashed-panda-backend
 package main
 
 import (
 	"encoding/json"
+	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -11,34 +14,48 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
+//Category This corresponds to the category that a particular ingredient falls under.
 type Category int
 
 const (
+	//Alcohol Anything that taking a shot of wouldn't be totally ridiculous
 	Alcohol Category = iota
+	//Mixer Any ingredient that wouldn't be totally ridiculous filling a 12 oz cup with
 	Mixer
+	//Other All other ingredients
 	Other
 )
 
+//Scale The approximate size of the final drink
 type Scale int
 
 const (
+	//Shot The size of a shot glass. Should be reserved for drinks that are mostly alcohol
 	Shot Scale = iota
+	//Glass Roughly the size of a small cocktail, like White Russian or Old Fashioned size
 	Glass
+	//Cup About a 12 oz cup full
 	Cup
+	//Buttchug For the adventrous.
 	Buttchug
 )
 
+//Ingredient The fundamental building block of a drink.
 type Ingredient struct {
-	ID   int      `json:"ID"`
-	Name string   `json:"Name"`
-	Cat  Category `json:"Category"`
+	ID     int      `json:"ID"`
+	Name   string   `json:"Name"`
+	Cat    Category `json:"Category"`
+	Color  string   `json:"Color"`
+	Brands []string `json:"Brands"`
 }
 
+//Proportion This describes how much of a drink is commposed of this particular Ingredient
 type Proportion struct {
 	Ing  Ingredient `json:"Ingredient"`
 	Frac float32    `json:"Fraction"`
 }
 
+//Drink The overall representation of a finished drink.
 type Drink struct {
 	Name     string       `json:"Name"`
 	Contents []Proportion `json:"Contents"`
@@ -60,8 +77,7 @@ func makeDrinkFromList(w http.ResponseWriter, r *http.Request, ps httprouter.Par
 	ids := strings.Split(idString, "-")
 
 	allIngredients := getAllIngredients()
-	ingredients := ingredientsForDrink(ids, allIngredients)
-
+	ingredients := ingredientsForDrink(ids, makeIDMap(allIngredients))
 	setDefaultHeader(w)
 	json.NewEncoder(w).Encode(Drink{
 		Name:     "Test",
@@ -81,31 +97,29 @@ func main() {
 }
 
 func getAllIngredients() []Ingredient {
-	return []Ingredient{
-		Ingredient{
-			ID:   0,
-			Name: "Vodka",
-			Cat:  Alcohol,
-		},
-		Ingredient{
-			ID:   1,
-			Name: "Milk",
-			Cat:  Mixer,
-		},
-		Ingredient{
-			ID:   2,
-			Name: "Kahlua",
-			Cat:  Alcohol,
-		},
-		Ingredient{
-			ID:   3,
-			Name: "Cocoa powder",
-			Cat:  Other,
-		},
+	goPath := os.Getenv("GOPATH")
+	println(goPath)
+	file, err := ioutil.ReadFile(goPath + "/src/github.com/bsomes/trashed-panda-backend/inputs/classified-ingredients.json")
+	if err != nil {
+		fmt.Println(err.Error())
 	}
+	var ings []Ingredient
+	marshalError := json.Unmarshal(file, &ings)
+	if marshalError != nil {
+		println(marshalError.Error())
+	}
+	return ings
 }
 
-func ingredientsForDrink(ids []string, available []Ingredient) []Ingredient {
+func makeIDMap(ings []Ingredient) map[int]Ingredient {
+	result := make(map[int]Ingredient, len(ings))
+	for _, v := range ings {
+		result[v.ID] = v
+	}
+	return result
+}
+
+func ingredientsForDrink(ids []string, available map[int]Ingredient) []Ingredient {
 	ingredients := make([]Ingredient, len(ids))
 	for ind, v := range ids {
 		if i, err := strconv.Atoi(v); err == nil {
