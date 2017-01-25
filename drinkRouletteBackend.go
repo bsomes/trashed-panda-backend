@@ -4,7 +4,6 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -97,14 +96,22 @@ func main() {
 }
 
 func getAllIngredients() []Ingredient {
-	goPath := os.Getenv("GOPATH")
-	println(goPath)
-	file, err := ioutil.ReadFile(goPath + "/src/github.com/bsomes/trashed-panda-backend/inputs/classified-ingredients.json")
+	path := http.Dir("./inputs")
+	file, err := path.Open("classified-ingredients.json")
 	if err != nil {
 		fmt.Println(err.Error())
+		return nil
 	}
+	stats, statsErr := file.Stat()
+	if statsErr != nil {
+		return nil
+	}
+	var size = stats.Size()
+
+	data := make([]byte, size)
+	file.Read(data)
 	var ings []Ingredient
-	marshalError := json.Unmarshal(file, &ings)
+	marshalError := json.Unmarshal(data, &ings)
 	if marshalError != nil {
 		println(marshalError.Error())
 	}
