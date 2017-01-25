@@ -2,6 +2,8 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -29,9 +31,11 @@ const (
 )
 
 type Ingredient struct {
-	ID   int      `json:"ID"`
-	Name string   `json:"Name"`
-	Cat  Category `json:"Category"`
+	ID     int      `json:"ID"`
+	Name   string   `json:"Name"`
+	Cat    Category `json:"Category"`
+	Color  string   `json:"Color"`
+	Brands []string `json:"Brands"`
 }
 
 type Proportion struct {
@@ -54,7 +58,7 @@ func makeDrinkFromList(w http.ResponseWriter, r *http.Request, ps httprouter.Par
 	ids := strings.Split(idString, "-")
 
 	allIngredients := getAllIngredients()
-	ingredients := ingredientsForDrink(ids, allIngredients)
+	ingredients := ingredientsForDrink(ids, makeIDMap(allIngredients))
 	json.NewEncoder(w).Encode(Drink{
 		Name:     "Test",
 		Contents: uniform(ingredients),
@@ -73,31 +77,29 @@ func main() {
 }
 
 func getAllIngredients() []Ingredient {
-	return []Ingredient{
-		Ingredient{
-			ID:   0,
-			Name: "Vodka",
-			Cat:  Alcohol,
-		},
-		Ingredient{
-			ID:   1,
-			Name: "Milk",
-			Cat:  Mixer,
-		},
-		Ingredient{
-			ID:   2,
-			Name: "Kahlua",
-			Cat:  Alcohol,
-		},
-		Ingredient{
-			ID:   3,
-			Name: "Cocoa powder",
-			Cat:  Other,
-		},
+	goPath := os.Getenv("GOPATH")
+	println(goPath)
+	file, err := ioutil.ReadFile(goPath + "/src/github.com/bsomes/trashed-panda-backend/inputs/classified-ingredients.json")
+	if err != nil {
+		fmt.Println(err.Error())
 	}
+	var ings []Ingredient
+	marshalError := json.Unmarshal(file, &ings)
+	if marshalError != nil {
+		println(marshalError.Error())
+	}
+	return ings
 }
 
-func ingredientsForDrink(ids []string, available []Ingredient) []Ingredient {
+func makeIDMap(ings []Ingredient) map[int]Ingredient {
+	result := make(map[int]Ingredient, len(ings))
+	for _, v := range ings {
+		result[v.ID] = v
+	}
+	return result
+}
+
+func ingredientsForDrink(ids []string, available map[int]Ingredient) []Ingredient {
 	ingredients := make([]Ingredient, len(ids))
 	for ind, v := range ids {
 		if i, err := strconv.Atoi(v); err == nil {
