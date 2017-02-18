@@ -45,7 +45,7 @@ type Ingredient struct {
 	Name   string   `json:"Name"`
 	Cat    Category `json:"Category"`
 	Color  string   `json:"Color"`
-	Brands []string `json:"Brands"`
+	BaseID int      `json:"BaseID"`
 }
 
 //Proportion This describes how much of a drink is commposed of this particular Ingredient

@@ -13,7 +13,7 @@ func TestIngredientLookup(t *testing.T) {
 
 func TestIngredientLoad(t *testing.T) {
 	ingredients := getAllIngredients()
-	expectedName := "Gold Rum"
+	expectedName := "cream liqueur"
 	if ingredients[0].Name != expectedName {
 		t.Error("Expected the first ingredient to be", "instead it was", expectedName, ingredients[0].Name)
 	}
