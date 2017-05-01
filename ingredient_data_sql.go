@@ -55,7 +55,7 @@ func (i *ingredientData) getAllIngredientsWithIDs(ids []string) []Ingredient {
 	var (
 		id       int
 		name     string
-		color    string
+		color    sql.NullString
 		baseID   int
 		category Category
 	)
@@ -76,13 +76,23 @@ func (i *ingredientData) getAllIngredientsWithIDs(ids []string) []Ingredient {
 		if err != nil {
 			log.Fatal(err)
 		}
-		ingredients = append(ingredients, Ingredient{
-			ID:     id,
-			Name:   name,
-			Color:  color,
-			BaseID: baseID,
-			Cat:    category,
-		})
+		if color.Valid {
+			ingredients = append(ingredients, Ingredient{
+				ID:     id,
+				Name:   name,
+				Color:  color.String,
+				BaseID: baseID,
+				Cat:    category,
+			})
+		} else {
+			ingredients = append(ingredients, Ingredient{
+				ID:     id,
+				Name:   name,
+				Color:  "",
+				BaseID: baseID,
+				Cat:    category,
+			})
+		}
 	}
 	return ingredients
 }
