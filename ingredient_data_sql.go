@@ -19,7 +19,7 @@ func (i *ingredientData) getAllIngredients() []Ingredient {
 		ing      Ingredient
 	)
 	ingredients := make([]Ingredient, 0)
-	rows, err := i.data.Query("select i.id, i.name, i.color, i.baseid, b.category from ingredients i join baseingredients b on i.id = b.id")
+	rows, err := i.data.Query("select i.id, i.name, i.color, i.baseid, b.category from ingredients i join baseingredients b on i.baseid = b.id")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -59,7 +59,7 @@ func (i *ingredientData) getAllIngredientsWithIDs(ids []string) []Ingredient {
 		baseID   int
 		category Category
 	)
-	statement := "select i.id, i.name, i.color, i.baseid, b.category from ingredients i join baseIngredients b on i.id = b.id  where i.id = any($1::integer[])"
+	statement := "select i.id, i.name, i.color, i.baseid, b.category from ingredients i join baseIngredients b on i.baseid = b.id  where i.id = any($1::integer[])"
 	args := "{"
 	for _, v := range ids {
 		args += v + ","
