@@ -11,20 +11,21 @@ type ingredientData struct {
 
 func (i *ingredientData) getAllIngredients() []Ingredient {
 	var (
-		id     int
-		name   string
-		color  sql.NullString
-		baseID int
-		ing    Ingredient
+		id       int
+		name     string
+		color    sql.NullString
+		baseID   int
+		category Category
+		ing      Ingredient
 	)
 	ingredients := make([]Ingredient, 0)
-	rows, err := i.data.Query("select i.id, name, color, baseid from ingredients i join baseingredients b on i.id = b.id")
+	rows, err := i.data.Query("select i.id, i.name, i.color, i.baseid, b.category from ingredients i join baseingredients b on i.id = b.id")
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer rows.Close()
 	for rows.Next() {
-		err := rows.Scan(&id, &name, &color, &baseID)
+		err := rows.Scan(&id, &name, &color, &baseID, &category)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -34,6 +35,7 @@ func (i *ingredientData) getAllIngredients() []Ingredient {
 				Name:   name,
 				Color:  "",
 				BaseID: baseID,
+				Cat:    category,
 			}
 		} else {
 			ing = Ingredient{
@@ -41,6 +43,7 @@ func (i *ingredientData) getAllIngredients() []Ingredient {
 				Name:   name,
 				Color:  color.String,
 				BaseID: baseID,
+				Cat:    category,
 			}
 		}
 		ingredients = append(ingredients, ing)
@@ -50,12 +53,13 @@ func (i *ingredientData) getAllIngredients() []Ingredient {
 
 func (i *ingredientData) getAllIngredientsWithIDs(ids []string) []Ingredient {
 	var (
-		id     int
-		name   string
-		color  string
-		baseID int
+		id       int
+		name     string
+		color    string
+		baseID   int
+		category Category
 	)
-	statement := "select i.id, name, color, baseid from ingredients i join baseIngredients b on i.id = b.id  where i.id = any($1::integer[])"
+	statement := "select i.id, i.name, i.color, i.baseid, b.category from ingredients i join baseIngredients b on i.id = b.id  where i.id = any($1::integer[])"
 	args := "{"
 	for _, v := range ids {
 		args += v + ","
@@ -68,7 +72,7 @@ func (i *ingredientData) getAllIngredientsWithIDs(ids []string) []Ingredient {
 	}
 	defer rows.Close()
 	for rows.Next() {
-		err := rows.Scan(&id, &name, &color, &baseID)
+		err := rows.Scan(&id, &name, &color, &baseID, &category)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -77,6 +81,7 @@ func (i *ingredientData) getAllIngredientsWithIDs(ids []string) []Ingredient {
 			Name:   name,
 			Color:  color,
 			BaseID: baseID,
+			Cat:    category,
 		})
 	}
 	return ingredients
