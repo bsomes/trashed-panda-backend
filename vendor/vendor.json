@@ -3,6 +3,18 @@
 	"ignore": "test",
 	"package": [
 		{
+			"checksumSHA1": "4+xwS451mS6ABGznvtOA+f1H/ds=",
+			"path": "github.com/jackc/pgx",
+			"revision": "c16671e77e8a1e52a942a1b9c874121a946aa7a6",
+			"revisionTime": "2017-04-17T13:44:24Z"
+		},
+		{
+			"checksumSHA1": "IG9ny6O8mX7eslDDauIN4seHkMY=",
+			"path": "github.com/jackc/pgx/stdlib",
+			"revision": "c16671e77e8a1e52a942a1b9c874121a946aa7a6",
+			"revisionTime": "2017-04-17T13:44:24Z"
+		},
+		{
 			"checksumSHA1": "Y3U6on66N0BszKXYvb2Q+qpG6f4=",
 			"path": "github.com/julienschmidt/httprouter",
 			"revision": "5dd70ee059943e81987a817fa1a755b11dd119c1",
