@@ -2,14 +2,14 @@
 package main
 
 import (
+	"database/sql"
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"os"
-	"strconv"
 	"strings"
 
+	_ "github.com/jackc/pgx/stdlib"
 	"github.com/julienschmidt/httprouter"
 )
 
@@ -51,7 +51,7 @@ type Ingredient struct {
 //Proportion This describes how much of a drink is commposed of this particular Ingredient
 type Proportion struct {
 	Ing  Ingredient `json:"Ingredient"`
-	Frac float32    `json:"Fraction"`
+	Frac float64    `json:"Fraction"`
 }
 
 //Drink The overall representation of a finished drink.
@@ -68,26 +68,49 @@ func setDefaultHeader(w http.ResponseWriter) {
 
 func getEncodedIngredients(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	setDefaultHeader(w)
-	json.NewEncoder(w).Encode(getAllIngredients())
+	ingData := ingredientData{
+		data: db,
+	}
+	json.NewEncoder(w).Encode(ingData.getAllIngredients())
 }
 
 func makeDrinkFromList(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	idString := ps.ByName("ingredients")
 	ids := strings.Split(idString, "-")
 
-	allIngredients := getAllIngredients()
-	ingredients := ingredientsForDrink(ids, makeIDMap(allIngredients))
+	ingData := ingredientData{
+		data: db,
+	}
+	ingredients := ingData.getAllIngredientsWithIDs(ids)
+	drinkData := drinkDataSQL{
+		db: db,
+	}
+	creator := drinkCreator{
+		data: &drinkData,
+	}
+	drink := creator.makeDrink(ingredients)
 	setDefaultHeader(w)
-	json.NewEncoder(w).Encode(Drink{
-		Name:     "Test",
-		Contents: uniform(ingredients),
-		Size:     Buttchug,
-	})
+	json.NewEncoder(w).Encode(drink)
 }
+
+var db *sql.DB
 
 func main() {
 	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
 
+	databaseConnection := os.Getenv("DATABASE_URL")
+	if databaseConnection == "" {
+		databaseConnection = "postgresql://localhost:5432/briansomes"
+	}
+
+	data, err := sql.Open("pgx", databaseConnection)
+	if err != nil {
+		log.Fatal(err)
+	}
+	db = data
 	router := httprouter.New()
 	router.GET("/ingredients", getEncodedIngredients)
 	router.GET("/makedrink/:ingredients", makeDrinkFromList)
@@ -95,51 +118,10 @@ func main() {
 	log.Fatal(http.ListenAndServe(":"+port, router))
 }
 
-func getAllIngredients() []Ingredient {
-	path := http.Dir("./inputs")
-	file, err := path.Open("classified-ingredients.json")
-	if err != nil {
-		fmt.Println(err.Error())
-		return nil
-	}
-	stats, statsErr := file.Stat()
-	if statsErr != nil {
-		return nil
-	}
-	var size = stats.Size()
-
-	data := make([]byte, size)
-	file.Read(data)
-	var ings []Ingredient
-	marshalError := json.Unmarshal(data, &ings)
-	if marshalError != nil {
-		println(marshalError.Error())
-	}
-	return ings
-}
-
-func makeIDMap(ings []Ingredient) map[int]Ingredient {
-	result := make(map[int]Ingredient, len(ings))
-	for _, v := range ings {
-		result[v.ID] = v
-	}
-	return result
-}
-
-func ingredientsForDrink(ids []string, available map[int]Ingredient) []Ingredient {
-	ingredients := make([]Ingredient, len(ids))
-	for ind, v := range ids {
-		if i, err := strconv.Atoi(v); err == nil {
-			ingredients[ind] = available[i]
-		}
-	}
-	return ingredients
-}
-
 func uniform(ingredients []Ingredient) []Proportion {
 	proportions := make([]Proportion, len(ingredients))
 	for i := range proportions {
-		proportions[i] = Proportion{Ing: ingredients[i], Frac: 1 / float32(len(ingredients))}
+		proportions[i] = Proportion{Ing: ingredients[i], Frac: 1 / float64(len(ingredients))}
 	}
 	return proportions
 }
