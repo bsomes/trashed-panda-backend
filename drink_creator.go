@@ -90,25 +90,40 @@ func (c *drinkCreator) utilityOfAllCandidates(candidateIDs []int, currentlyInclu
 	return utilities
 }
 
-func (c *drinkCreator) drawNextIngredient(candidateIDs []int, currentlyIncludedIDs []int) int {
-	utilities := c.utilityOfAllCandidates(candidateIDs, currentlyIncludedIDs)
-	sum := 0.0
+func continueDrawing(utilities []float64) bool {
+	firstVal := utilities[0]
 	for _, v := range utilities {
-		sum += v
-	}
-	probabilities := make([]float64, len(utilities))
-	cumulative := 0.0
-	for i := range probabilities {
-		cumulative += utilities[i] / sum
-		probabilities[i] = cumulative
-	}
-	draw := rand.Float64()
-	for i, v := range probabilities {
-		if draw < v {
-			return candidateIDs[i]
+		if v != firstVal {
+			return true
 		}
 	}
-	//This should never happen
+	draw := rand.Float64()
+	if draw < 0.5 {
+		return false
+	}
+	return true
+}
+
+func (c *drinkCreator) drawNextIngredient(candidateIDs []int, currentlyIncludedIDs []int) int {
+	utilities := c.utilityOfAllCandidates(candidateIDs, currentlyIncludedIDs)
+	if continueDrawing(utilities) {
+		sum := 0.0
+		for _, v := range utilities {
+			sum += v
+		}
+		probabilities := make([]float64, len(utilities))
+		cumulative := 0.0
+		for i := range probabilities {
+			cumulative += utilities[i] / sum
+			probabilities[i] = cumulative
+		}
+		draw := rand.Float64()
+		for i, v := range probabilities {
+			if draw < v {
+				return candidateIDs[i]
+			}
+		}
+	}
 	return -1
 }
 
@@ -126,6 +141,9 @@ func (c *drinkCreator) makeIngredientList(candidateBaseIDs []int, firstIngredien
 			return ingList
 		}
 		nextIngredient := c.drawNextIngredient(candidateBaseIDs, ingList)
+		if nextIngredient == -1 {
+			return ingList
+		}
 		ingList = append(ingList, nextIngredient)
 		for i, v := range candidateBaseIDs {
 			if v == nextIngredient {
