@@ -9,8 +9,8 @@ import (
 )
 
 const (
-	a float64 = 1.0
-	b float64 = 4.0
+	a float64 = 3.0
+	b float64 = 10.0
 	c float64 = 1.0
 )
 
@@ -32,18 +32,43 @@ func (c *drinkCreator) utilityOfIngredient(candidateID int, currentIncludedIds [
 	if len(currentIncludedIds) == 0 {
 		return 0, errors.New("Tried to calculate utility without any ingredients already included")
 	}
-	inCommonWithLast := c.data.NumDrinksWithBothIngredients(candidateID, currentIncludedIds[len(currentIncludedIds)-1])
-	totalWithLast := c.data.NumDrinksWithIngredient(currentIncludedIds[len(currentIncludedIds)-1])
+	var wg sync.WaitGroup
+	wg.Add(2)
+	var (
+		inCommonWithLast    int
+		totalWithLast       int
+		inCommonWithLastTwo int
+		totalWithLastTwo    int
+	)
+	go func() {
+		defer wg.Done()
+		inCommonWithLast = c.data.NumDrinksWithBothIngredients(candidateID, currentIncludedIds[len(currentIncludedIds)-1])
+	}()
+	go func() {
+		defer wg.Done()
+		totalWithLast = c.data.NumDrinksWithIngredient(currentIncludedIds[len(currentIncludedIds)-1])
+	}()
+
 	if len(currentIncludedIds) < 2 {
+		wg.Wait()
 		return utility(inCommonWithLast, totalWithLast, 0, 0), nil
 	}
-	inCommonWithLastTwo := c.data.NumDrinksWithThreeIngredients(
-		candidateID,
-		currentIncludedIds[len(currentIncludedIds)-1],
-		currentIncludedIds[len(currentIncludedIds)-2])
-	totalWithLastTwo := c.data.NumDrinksWithBothIngredients(
-		currentIncludedIds[len(currentIncludedIds)-1],
-		currentIncludedIds[len(currentIncludedIds)-2])
+
+	wg.Add(2)
+	go func() {
+		defer wg.Done()
+		inCommonWithLastTwo = c.data.NumDrinksWithThreeIngredients(
+			candidateID,
+			currentIncludedIds[len(currentIncludedIds)-1],
+			currentIncludedIds[len(currentIncludedIds)-2])
+	}()
+	go func() {
+		defer wg.Done()
+		totalWithLastTwo = c.data.NumDrinksWithBothIngredients(
+			currentIncludedIds[len(currentIncludedIds)-1],
+			currentIncludedIds[len(currentIncludedIds)-2])
+	}()
+	wg.Wait()
 	return utility(inCommonWithLast, totalWithLast, inCommonWithLastTwo, totalWithLastTwo), nil
 }
 
@@ -65,25 +90,40 @@ func (c *drinkCreator) utilityOfAllCandidates(candidateIDs []int, currentlyInclu
 	return utilities
 }
 
-func (c *drinkCreator) drawNextIngredient(candidateIDs []int, currentlyIncludedIDs []int) int {
-	utilities := c.utilityOfAllCandidates(candidateIDs, currentlyIncludedIDs)
-	sum := 0.0
+func continueDrawing(utilities []float64) bool {
+	firstVal := utilities[0]
 	for _, v := range utilities {
-		sum += v
-	}
-	probabilities := make([]float64, len(utilities))
-	cumulative := 0.0
-	for i := range probabilities {
-		cumulative += utilities[i] / sum
-		probabilities[i] = cumulative
-	}
-	draw := rand.Float64()
-	for i, v := range probabilities {
-		if draw < v {
-			return candidateIDs[i]
+		if v != firstVal {
+			return true
 		}
 	}
-	//This should never happen
+	draw := rand.Float64()
+	if draw < 0.5 {
+		return false
+	}
+	return true
+}
+
+func (c *drinkCreator) drawNextIngredient(candidateIDs []int, currentlyIncludedIDs []int) int {
+	utilities := c.utilityOfAllCandidates(candidateIDs, currentlyIncludedIDs)
+	if continueDrawing(utilities) {
+		sum := 0.0
+		for _, v := range utilities {
+			sum += v
+		}
+		probabilities := make([]float64, len(utilities))
+		cumulative := 0.0
+		for i := range probabilities {
+			cumulative += utilities[i] / sum
+			probabilities[i] = cumulative
+		}
+		draw := rand.Float64()
+		for i, v := range probabilities {
+			if draw < v {
+				return candidateIDs[i]
+			}
+		}
+	}
 	return -1
 }
 
@@ -101,6 +141,9 @@ func (c *drinkCreator) makeIngredientList(candidateBaseIDs []int, firstIngredien
 			return ingList
 		}
 		nextIngredient := c.drawNextIngredient(candidateBaseIDs, ingList)
+		if nextIngredient == -1 {
+			return ingList
+		}
 		ingList = append(ingList, nextIngredient)
 		for i, v := range candidateBaseIDs {
 			if v == nextIngredient {

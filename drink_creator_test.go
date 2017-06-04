@@ -38,7 +38,7 @@ func Test_Utility(t *testing.T) {
 	totalWithLast := 20
 	inCommonWithLastTwo := 1
 	totalWithLastTwo := 3
-	expected := 2.4833333
+	expected := 4.7833333
 
 	result := utility(inCommonWithLast, totalWithLast, inCommonWithLastTwo, totalWithLastTwo)
 	if math.Abs(expected-result) > 1e-6 {
@@ -59,7 +59,7 @@ func Test_IngredientUtilityOneIncluded(t *testing.T) {
 	t.Parallel()
 	creator := drinkCreator{&fakeData{}}
 	included := []int{1}
-	expected := 1.25
+	expected := 1.75
 	result, err := creator.utilityOfIngredient(0, included)
 	if err != nil {
 		t.Error(err)
@@ -73,7 +73,7 @@ func Test_IngredientUtilityMultiple(t *testing.T) {
 	t.Parallel()
 	creator := drinkCreator{&fakeData{}}
 	included := []int{1, 2}
-	expected := 2.05
+	expected := 3.75
 
 	result, err := creator.utilityOfIngredient(0, included)
 	if err != nil {
@@ -88,7 +88,7 @@ func Test_AllCandidateUtility(t *testing.T) {
 	t.Parallel()
 	creator := drinkCreator{&fakeData{}}
 	included := []int{1, 2}
-	expected := []float64{2.05, 2.8}
+	expected := []float64{3.75, 5.6}
 
 	actual := creator.utilityOfAllCandidates([]int{4, 69}, included)
 	for i, v := range actual {
