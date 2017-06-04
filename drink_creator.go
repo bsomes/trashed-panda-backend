@@ -169,6 +169,12 @@ func (c *drinkCreator) makeDrink(ingredients []Ingredient) Drink {
 		i++
 	}
 	firstIngredient := drawAlcohol(ingredients)
+	for i, v := range baseIDs {
+		if v == firstIngredient.BaseID {
+			baseIDs[i] = baseIDs[len(baseIDs)-1]
+			baseIDs = baseIDs[:len(baseIDs)-1]
+		}
+	}
 	ingredientBaseIDs := c.makeIngredientList(baseIDs, firstIngredient.BaseID)
 	finalIngredients := make([]Ingredient, 0)
 	for _, v := range ingredients {
