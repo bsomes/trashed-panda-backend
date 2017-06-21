@@ -73,7 +73,9 @@ func getEncodedIngredients(w http.ResponseWriter, r *http.Request, _ httprouter.
 	json.NewEncoder(w).Encode(ingData.getAllIngredients())
 }
 
-func makeDrinkFromList(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func makeDrinkFromList(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+	setDefaultHeader(w)
+
 	var ids []int
 	json.NewDecoder(r.Body).Decode(&ids)
 
@@ -88,8 +90,13 @@ func makeDrinkFromList(w http.ResponseWriter, r *http.Request, ps httprouter.Par
 		data: &drinkData,
 	}
 	drink := creator.makeDrink(ingredients)
-	setDefaultHeader(w)
 	json.NewEncoder(w).Encode(drink)
+}
+
+func handlePreflightRequest(w http.ResponseWriter, _ *http.Request, _ httprouter.Params) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "POST")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 }
 
 var db *sql.DB
@@ -113,6 +120,7 @@ func main() {
 	router := httprouter.New()
 	router.GET("/ingredients", getEncodedIngredients)
 	router.POST("/makedrink", makeDrinkFromList)
+	router.OPTIONS("/makedrink", handlePreflightRequest)
 
 	log.Fatal(http.ListenAndServe(":"+port, router))
 }
