@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"log"
+	"strconv"
 )
 
 type ingredientData struct {
@@ -51,7 +52,7 @@ func (i *ingredientData) getAllIngredients() []Ingredient {
 	return ingredients
 }
 
-func (i *ingredientData) getAllIngredientsWithIDs(ids []string) []Ingredient {
+func (i *ingredientData) getAllIngredientsWithIDs(ids []int) []Ingredient {
 	var (
 		id       int
 		name     string
@@ -62,7 +63,7 @@ func (i *ingredientData) getAllIngredientsWithIDs(ids []string) []Ingredient {
 	statement := "select i.id, i.name, i.color, i.baseid, b.category from ingredients i join baseIngredients b on i.baseid = b.id  where i.id = any($1::integer[])"
 	args := "{"
 	for _, v := range ids {
-		args += v + ","
+		args += strconv.Itoa(v) + ","
 	}
 	args = args[:len(args)-1] + "}"
 	ingredients := make([]Ingredient, 0)
