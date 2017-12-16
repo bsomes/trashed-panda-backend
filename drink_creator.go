@@ -11,7 +11,7 @@ import (
 const (
 	a float64 = 3.0
 	b float64 = 10.0
-	c float64 = 1.0
+	c float64 = 0.5
 )
 
 type drinkData interface {
@@ -32,43 +32,22 @@ func (c *drinkCreator) utilityOfIngredient(candidateID int, currentIncludedIds [
 	if len(currentIncludedIds) == 0 {
 		return 0, errors.New("Tried to calculate utility without any ingredients already included")
 	}
-	var wg sync.WaitGroup
-	wg.Add(2)
-	var (
-		inCommonWithLast    int
-		totalWithLast       int
-		inCommonWithLastTwo int
-		totalWithLastTwo    int
-	)
-	go func() {
-		defer wg.Done()
-		inCommonWithLast = c.data.NumDrinksWithBothIngredients(candidateID, currentIncludedIds[len(currentIncludedIds)-1])
-	}()
-	go func() {
-		defer wg.Done()
-		totalWithLast = c.data.NumDrinksWithIngredient(currentIncludedIds[len(currentIncludedIds)-1])
-	}()
+
+	inCommonWithLast := c.data.NumDrinksWithBothIngredients(candidateID, currentIncludedIds[len(currentIncludedIds)-1])
+
+	totalWithLast := c.data.NumDrinksWithIngredient(currentIncludedIds[len(currentIncludedIds)-1])
 
 	if len(currentIncludedIds) < 2 {
-		wg.Wait()
 		return utility(inCommonWithLast, totalWithLast, 0, 0), nil
 	}
 
-	wg.Add(2)
-	go func() {
-		defer wg.Done()
-		inCommonWithLastTwo = c.data.NumDrinksWithThreeIngredients(
-			candidateID,
-			currentIncludedIds[len(currentIncludedIds)-1],
-			currentIncludedIds[len(currentIncludedIds)-2])
-	}()
-	go func() {
-		defer wg.Done()
-		totalWithLastTwo = c.data.NumDrinksWithBothIngredients(
-			currentIncludedIds[len(currentIncludedIds)-1],
-			currentIncludedIds[len(currentIncludedIds)-2])
-	}()
-	wg.Wait()
+	inCommonWithLastTwo := c.data.NumDrinksWithThreeIngredients(
+		candidateID,
+		currentIncludedIds[len(currentIncludedIds)-1],
+		currentIncludedIds[len(currentIncludedIds)-2])
+	totalWithLastTwo := c.data.NumDrinksWithBothIngredients(
+		currentIncludedIds[len(currentIncludedIds)-1],
+		currentIncludedIds[len(currentIncludedIds)-2])
 	return utility(inCommonWithLast, totalWithLast, inCommonWithLastTwo, totalWithLastTwo), nil
 }
 
