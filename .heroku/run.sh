@@ -8,5 +8,7 @@ tar -C $TARGET_DIRECTORY -xz
 CURRENT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PARENT_DIR="$(dirname $CURRENT_DIR)"
 
+echo $PARENT_DIR
+
 export LIBRARY_PATH=$LIBRARY_PATH:$PARENT_DIR/lib/lib
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$PARENT_DIR/lib/lib
