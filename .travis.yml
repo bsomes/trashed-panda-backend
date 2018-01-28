@@ -1,5 +1,5 @@
 language: go
 
-befofe_install: ./.heroku/run.sh
+before_install: ./.heroku/run.sh
 
 go: 1.9
