@@ -1,0 +1,23 @@
+{
+  "name": "trashed-panda-backend",
+  "scripts": {
+  },
+  "env": {
+  },
+  "formation": {
+    "web": {
+      "quantity": 1
+    }
+  },
+  "addons": [
+    "heroku-postgresql"
+  ],
+  "buildpacks": [
+    {
+      "url": "https://github.com/niteoweb/heroku-buildpack-shell.git"
+    },
+    {
+      "url": "heroku/go"
+    }
+  ]
+}
