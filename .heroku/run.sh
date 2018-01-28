@@ -5,5 +5,8 @@ TF_TYPE="cpu" # Change to "gpu" for GPU support
    "https://storage.googleapis.com/tensorflow/libtensorflow/libtensorflow-${TF_TYPE}-linux-x86_64-1.5.0.tar.gz" |
 tar -C $TARGET_DIRECTORY -xz
 
-export LIBRARY_PATH=$LIBRARY_PATH:./lib
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:./lib
+CURRENT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PARENT_DIR="$(dirname $CURRENT_DIR)"
+
+export LIBRARY_PATH=$LIBRARY_PATH:$PARENT_DIR/lib
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$PARENT_DIR/lib
