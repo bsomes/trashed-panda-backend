@@ -25,7 +25,8 @@ type drinkData interface {
 }
 
 type drinkCreator struct {
-	data drinkData
+	data      drinkData
+	nameMaker nameGenerator
 }
 
 func (c *drinkCreator) utilityOfIngredient(candidateID int, currentIncludedIds []int) (float64, error) {
@@ -162,10 +163,18 @@ func (c *drinkCreator) makeDrink(ingredients []Ingredient) Drink {
 		}
 	}
 	return Drink{
-		Name:     "Test",
+		Name:     c.nameMaker.NameWithIngredients(getIds(finalIngredients)),
 		Contents: uniform(finalIngredients),
 		Size:     Buttchug,
 	}
+}
+
+func getIds(ingredients []Ingredient) []int {
+	ids := make([]int, 0)
+	for _, v := range ingredients {
+		ids = append(ids, v.BaseID)
+	}
+	return ids
 }
 
 func baseIDIncluded(ids []int, baseID int) bool {

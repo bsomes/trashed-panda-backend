@@ -32,13 +32,19 @@ func (f *fakeData) NumIngredientsInDrink(ingredientID int) (int, int) {
 	return 4, 7
 }
 
+type fakeName struct{}
+
+func (n *fakeName) NameWithIngredients(indgredients []int) string {
+	return "Test"
+}
+
 func Test_Utility(t *testing.T) {
 	t.Parallel()
 	inCommonWithLast := 3
 	totalWithLast := 20
 	inCommonWithLastTwo := 1
 	totalWithLastTwo := 3
-	expected := 4.7833333
+	expected := 4.2833333
 
 	result := utility(inCommonWithLast, totalWithLast, inCommonWithLastTwo, totalWithLastTwo)
 	if math.Abs(expected-result) > 1e-6 {
@@ -48,7 +54,7 @@ func Test_Utility(t *testing.T) {
 
 func Test_IngredientUtilityError(t *testing.T) {
 	t.Parallel()
-	creator := drinkCreator{&fakeData{}}
+	creator := drinkCreator{&fakeData{}, &fakeName{}}
 	_, err := creator.utilityOfIngredient(0, make([]int, 0))
 	if err == nil {
 		t.Error("Utility should throw error for empty included list")
@@ -57,9 +63,9 @@ func Test_IngredientUtilityError(t *testing.T) {
 
 func Test_IngredientUtilityOneIncluded(t *testing.T) {
 	t.Parallel()
-	creator := drinkCreator{&fakeData{}}
+	creator := drinkCreator{&fakeData{}, &fakeName{}}
 	included := []int{1}
-	expected := 1.75
+	expected := 1.25
 	result, err := creator.utilityOfIngredient(0, included)
 	if err != nil {
 		t.Error(err)
@@ -71,9 +77,9 @@ func Test_IngredientUtilityOneIncluded(t *testing.T) {
 
 func Test_IngredientUtilityMultiple(t *testing.T) {
 	t.Parallel()
-	creator := drinkCreator{&fakeData{}}
+	creator := drinkCreator{&fakeData{}, &fakeName{}}
 	included := []int{1, 2}
-	expected := 3.75
+	expected := 3.25
 
 	result, err := creator.utilityOfIngredient(0, included)
 	if err != nil {
@@ -86,9 +92,9 @@ func Test_IngredientUtilityMultiple(t *testing.T) {
 
 func Test_AllCandidateUtility(t *testing.T) {
 	t.Parallel()
-	creator := drinkCreator{&fakeData{}}
+	creator := drinkCreator{&fakeData{}, &fakeName{}}
 	included := []int{1, 2}
-	expected := []float64{3.75, 5.6}
+	expected := []float64{3.25, 5.1}
 
 	actual := creator.utilityOfAllCandidates([]int{4, 69}, included)
 	for i, v := range actual {
