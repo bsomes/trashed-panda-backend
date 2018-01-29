@@ -1,4 +1,4 @@
-mkdir lib
+mkdir /tensorflow
 TF_TYPE="cpu" # Change to "gpu" for GPU support
  TARGET_DIRECTORY='./lib'
  curl -L \
