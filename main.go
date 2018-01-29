@@ -87,7 +87,8 @@ func makeDrinkFromList(w http.ResponseWriter, r *http.Request, _ httprouter.Para
 		db: db,
 	}
 	creator := drinkCreator{
-		data: &drinkData,
+		data:      &drinkData,
+		nameMaker: rnn,
 	}
 	drink := creator.makeDrink(ingredients)
 	json.NewEncoder(w).Encode(drink)
@@ -100,6 +101,7 @@ func handlePreflightRequest(w http.ResponseWriter, _ *http.Request, _ httprouter
 }
 
 var db *sql.DB
+var rnn *rnnNameGenerator
 
 func main() {
 	port := os.Getenv("PORT")
@@ -116,6 +118,8 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	rnn = makeRnnNameGenerator("./inputs/vocabulary.txt", "./inputs/model")
+	defer rnn.Close()
 	db = data
 	router := httprouter.New()
 	router.GET("/ingredients", getEncodedIngredients)

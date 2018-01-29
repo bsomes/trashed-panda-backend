@@ -1,3 +1,10 @@
 language: go
 
-go: 1.8
+env:
+  - LIBRARY_PATH=$HOME/gopath/src/github.com/bsomes/trashed-panda-backend/lib/lib LD_LIBRARY_PATH=$HOME/gopath/src/github.com/bsomes/trashed-panda-backend/lib/lib
+
+before_install: 
+  - chmod +x ./.heroku/run.sh
+  - ./.heroku/run.sh
+
+go: 1.9

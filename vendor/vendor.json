@@ -19,6 +19,12 @@
 			"path": "github.com/julienschmidt/httprouter",
 			"revision": "5dd70ee059943e81987a817fa1a755b11dd119c1",
 			"revisionTime": "2016-12-03T08:33:52Z"
+		},
+		{
+			"checksumSHA1": "49OY0ZwekH6XdAQRJsHLMx4k2pc=",
+			"path": "github.com/tensorflow/tensorflow/tensorflow/go",
+			"revision": "438604fc885208ee05f9eef2d0f2c630e1360a83",
+			"revisionTime": "2017-12-08T04:12:18Z"
 		}
 	],
 	"rootPath": "github.com/bsomes/trashed-panda-backend"
