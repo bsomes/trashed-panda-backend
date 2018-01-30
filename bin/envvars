@@ -1,2 +1,2 @@
-export LIBRARY_PATH=$LIBRARY_PATH:/app/lib:${build_dir}/lib
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/app/lib:${build_dir}/lib
+export LIBRARY_PATH=/app/lib:${build_dir}/lib
+export LD_LIBRARY_PATH=/app/lib:${build_dir}/lib
