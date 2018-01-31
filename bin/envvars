@@ -1,5 +1,0 @@
-export LIBRARY_PATH=/app/lib:${build_dir}/lib
-export LD_LIBRARY_PATH=/app/lib:${build_dir}/lib
-
-echo $LIBRARY_PATH
-echo $LD_LIBRARY_PATH
