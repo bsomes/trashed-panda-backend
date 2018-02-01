@@ -8,12 +8,6 @@ import (
 	"sync"
 )
 
-const (
-	a float64 = 3.0
-	b float64 = 10.0
-	c float64 = 0.5
-)
-
 type drinkData interface {
 	//Gets count of drinks containing this base ingredient
 	NumDrinksWithIngredient(ingredientID int) int
@@ -208,7 +202,7 @@ func numIngredients(averageNumIngredients, maxNumIngredients int) int {
 	max := float64(maxNumIngredients)
 	mode := float64(averageNumIngredients)
 
-	f := (c - a) / (b - a)
+	f := (mode - min) / (max - min)
 	draw := rand.Float64()
 	if draw < f {
 		return int(min + math.Sqrt(draw*(max-min)*(mode-min)) + 0.5)
@@ -217,6 +211,12 @@ func numIngredients(averageNumIngredients, maxNumIngredients int) int {
 }
 
 func utility(inCommonWithLast, totalWithLast, inCommonWithLastTwo, totalWithLastTwo int) float64 {
+	const (
+		a float64 = 3.0
+		b float64 = 10.0
+		c float64 = 0.5
+	)
+
 	if totalWithLast == 0 {
 		return 0
 	} else if totalWithLastTwo == 0 {
