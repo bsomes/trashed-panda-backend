@@ -201,6 +201,9 @@ func numIngredients(averageNumIngredients, maxNumIngredients int) int {
 	min := 1.0
 	max := float64(maxNumIngredients)
 	mode := float64(averageNumIngredients)
+	if mode > 1 {
+		mode /= 2
+	}
 
 	f := (mode - min) / (max - min)
 	draw := rand.Float64()
