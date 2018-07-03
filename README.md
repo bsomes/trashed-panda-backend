@@ -3,6 +3,8 @@
 
 # trashed-panda-backend
 
+Backend server for [Drink Roulette](https://malwilley.github.io/drink-roulette/)
+
 ### Setup
 This application requires Go version 1.7 or later. Dependencies are managed using Govendor. Install this tool using 
 ```shell
